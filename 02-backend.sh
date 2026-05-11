@@ -84,7 +84,7 @@ VALIDATE $? "enable the backend"
 dnf install mysql -y   &>>$LOG_FILE
 VALIDATE $? "install the mysql"
 
-mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -p"${password}" < /app/schema/backend.sql  &>>$LOG_FILE
+mysql -h db.nsrikanth.online -uroot -p"${password}" < /app/schema/backend.sql  &>>$LOG_FILE
 VALIDATE $? "load  the schema"
 
 systemctl restart backend   &>>$LOG_FILE
