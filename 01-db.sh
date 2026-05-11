@@ -19,7 +19,5 @@ else
 fi
 
 
-VALIDATE(){
 
-}
 
