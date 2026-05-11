@@ -1,3 +1,5 @@
+#!/bin/bash
+
 USERID=$(id -u)
 TIMESTAMP=$(date +%F-%H-%M-%S)
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
@@ -9,8 +11,7 @@ G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 
-echo "enter the password"
-read -s password
+
 
 if [ $USERID -ne 0 ]
 then
@@ -84,7 +85,7 @@ VALIDATE $? "enable the backend"
 dnf install mysql -y   &>>$LOG_FILE
 VALIDATE $? "install the mysql"
 
-mysql -h db.nsrikanth.online -uroot -p"${password}" < /app/schema/backend.sql  &>>$LOG_FILE
+mysql -h db.nsrikanth.online -uroot -pExpenseApp@1 < /app/schema/backend.sql  &>>$LOG_FILE
 VALIDATE $? "load  the schema"
 
 systemctl restart backend   &>>$LOG_FILE
