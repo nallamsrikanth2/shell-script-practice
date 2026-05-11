@@ -32,64 +32,64 @@ VALIDATE (){
 
 }
 
-dnf module disable nodejs -y
+dnf module disable nodejs -y  &>>$LOG_FILE
 VALIDATE $? "disable the nodejs"
 
-dnf module enable nodejs:20 -y
+dnf module enable nodejs:20 -y  &>>$LOG_FILE
 VALIDATE $? "enable nodejs"
 
-dnf install nodejs -y
+dnf install nodejs -y  &>>$LOG_FILE
 VALIDATE $? "install the node js"
 
 id expense
 if [ $? -ne 0 ]
 then
-    useradd expense
+    useradd expense   &>>$LOG_FILE
     VALIDATE $? "create the user"
 else
     echo -e "$Y alredy user created $N"
 fi
 
-mkdir -p /app
+mkdir -p /app  &>>$LOG_FILE
 VALIDATE $? "creating  the app directory"
 
-rm -rf /app
+rm -rf /app  &>>$LOG_FILE
 VALIDATE $? "remove everything in app"
 
-curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip
+curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip  &>>$LOG_FILE
 VALIDATE $? "download the backend code"
 
-cd /app
+cd /app &>>$LOG_FILE
 VALIDATE $? "move  to app"
 
-unzip /tmp/backend.zip
+unzip /tmp/backend.zip &>>$LOG_FILE
 VALIDATE $? "unzip the code"
 
-cd /app
+cd /app  &>>$LOG_FILE
 VALIDATE $? "move to app"
 
-npm install
+npm install  &>>$LOG_FILE
 VALIDATE $? "install the dependencies"
 
-cp /home/ec2-user/shell-script-practice/backend.service /etc/systemd/system/backend.service
+cp /home/ec2-user/shell-script-practice/backend.service /etc/systemd/system/backend.service &>>$LOG_FILE
 VALIDATE $? "copy the backend services"
 
-systemctl daemon-reload
+systemctl daemon-reload  &>>$LOG_FILE
 VALIDATE $? "deemon reload"
 
-systemctl start backend
+systemctl start backend  &>>$LOG_FILE
 VALIDATE $? "start backend"
 
-systemctl enable backend
+systemctl enable backend   &>>$LOG_FILE
 VALIDATE $? "enable the backend"
 
-dnf install mysql -y
+dnf install mysql -y   &>>$LOG_FILE
 VALIDATE $? "install the mysql"
 
-mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -p"${password}" < /app/schema/backend.sql
+mysql -h <MYSQL-SERVER-IPADDRESS> -uroot -p"${password}" < /app/schema/backend.sql  &>>$LOG_FILE
 VALIDATE $? "load  the schema"
 
-systemctl restart backend
+systemctl restart backend   &>>$LOG_FILE
 VALIDATE $? "restart the backend"
 
 
