@@ -41,3 +41,13 @@ VALIDATE $? "start the nginx"
 rm -rf /usr/share/nginx/html/*
 VALIDATE $? "remove everything in html directory"
 
+curl -o /tmp/frontend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-frontend-v2.zip
+VALIDATE $? "download the frontend code"
+
+cd /usr/share/nginx/html
+VALIDATE $? "move to html"
+
+unzip /tmp/frontend.zip
+VALIDATE $? "unzip the code"
+
+cp 
