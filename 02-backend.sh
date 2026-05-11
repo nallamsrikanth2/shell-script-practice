@@ -3,92 +3,95 @@
 USERID=$(id -u)
 TIMESTAMP=$(date +%F-%H-%M-%S)
 SCRIPT_NAME=$(echo $0 | cut -d "." -f1)
-LOG_FILE=/tmp/$TIMESTAMP-$SCRIPT_NAME.log
-
+LOGFILE=/tmp/$SCRIPT_NAME-$TIMESTAMP.log
 
 R="\e[31m"
 G="\e[32m"
 Y="\e[33m"
 N="\e[0m"
 
-
-
-if [ $USERID -ne 0 ]
-then
-    echo -e "$R please run the root user"
-    exit 1
-else
-    echo -e "$G you are a root user $N"
-fi
-
-
-VALIDATE (){
-    if [ $? -ne 0 ]
-    then
-        echo -e "$R $2 ... Failure $N"
+VALIDATE(){
+    if [ $1 -ne 0 ]
+    then 
+        echo -e "$2 is $R FAILURE $N"
         exit 1
     else
-        echo -e "$G $2 ... Success $N"
+        echo -e "$2 is $G SUCCESS $N"
     fi
-
 }
 
-dnf module disable nodejs -y  &>>$LOG_FILE
-VALIDATE $? "disable the nodejs"
+echo "Script started at $TIMESTAMP" &>>$LOGFILE
 
-dnf module enable nodejs:20 -y  &>>$LOG_FILE
-VALIDATE $? "enable nodejs"
-
-dnf install nodejs -y  &>>$LOG_FILE
-VALIDATE $? "install the node js"
-
-id expense
-if [ $? -ne 0 ]
+# Root check
+if [ $USERID -ne 0 ]
 then
-    useradd expense   &>>$LOG_FILE
-    VALIDATE $? "create the user"
+    echo -e "$R Please run as root user $N"
+    exit 1
 else
-    echo -e "$Y alredy user created $N"
+    echo -e "$G You are root user $N"
 fi
 
-mkdir -p /app  &>>$LOG_FILE
-VALIDATE $? "creating  the app directory"
+# NodeJS setup
+dnf module disable nodejs -y &>>$LOGFILE
+VALIDATE $? "Disable NodeJS module"
 
-rm -rf /app/*  &>>$LOG_FILE
-VALIDATE $? "remove everything in app"
+dnf module enable nodejs:20 -y &>>$LOGFILE
+VALIDATE $? "Enable NodeJS:20"
 
-curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip  &>>$LOG_FILE
-VALIDATE $? "download the backend code"
+dnf install nodejs -y &>>$LOGFILE
+VALIDATE $? "Install NodeJS"
 
-cd /app &>>$LOG_FILE
-VALIDATE $? "move  to app"
+# Create user
+id expense &>>$LOGFILE
+if [ $? -ne 0 ]
+then
+    useradd expense &>>$LOGFILE
+    VALIDATE $? "Creating expense user"
+else
+    echo -e "$Y User already exists $N"
+fi
 
-unzip /tmp/backend.zip &>>$LOG_FILE
-VALIDATE $? "unzip the code"
+# App setup
+mkdir -p /app &>>$LOGFILE
+VALIDATE $? "Create /app directory"
 
+curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip &>>$LOGFILE
+VALIDATE $? "Download backend code"
 
-npm install  &>>$LOG_FILE
-VALIDATE $? "install the dependencies"
+cd /app &>>$LOGFILE
+VALIDATE $? "Change directory to /app"
 
-cp /home/ec2-user/shell-script-practice/backend.service /etc/systemd/system/backend.service &>>$LOG_FILE
-VALIDATE $? "copy the backend services"
+rm -rf /app/* &>>$LOGFILE
 
-systemctl daemon-reload  &>>$LOG_FILE
-VALIDATE $? "deemon reload"
+unzip /tmp/backend.zip &>>$LOGFILE
+VALIDATE $? "Unzip backend code"
 
-systemctl start backend  &>>$LOG_FILE
-VALIDATE $? "start backend"
+# Install dependencies
+npm install &>>$LOGFILE
+VALIDATE $? "Install NodeJS dependencies"
 
-systemctl enable backend   &>>$LOG_FILE
-VALIDATE $? "enable the backend"
+# Systemd service
+cp /home/ec2-user/expense-shell/backend.service /etc/systemd/system/backend.service &>>$LOGFILE
+VALIDATE $? "Copy backend.service"
 
-dnf install mysql -y   &>>$LOG_FILE
-VALIDATE $? "install the mysql"
+systemctl daemon-reload &>>$LOGFILE
+VALIDATE $? "Daemon reload"
 
-mysql -h db.nsrikanth.online -uroot -pExpenseApp@1 < /app/schema/backend.sql  &>>$LOG_FILE
-VALIDATE $? "load  the schema"
+systemctl start backend &>>$LOGFILE
+VALIDATE $? "Start backend"
 
-systemctl restart backend   &>>$LOG_FILE
-VALIDATE $? "restart the backend"
+systemctl enable backend &>>$LOGFILE
+VALIDATE $? "Enable backend"
 
+# MySQL client
+dnf install mysql -y &>>$LOGFILE
+VALIDATE $? "Install MySQL client"
 
+# Load schema
+mysql -h db.nsrikanth.online -uroot -pExpenseApp@1 < /app/schema/backend.sql &>>$LOGFILE
+VALIDATE $? "Load schema"
+
+systemctl restart backend &>>$LOGFILE
+VALIDATE $? "Restart backend"
+
+echo -e "$G Backend setup completed successfully $N"
