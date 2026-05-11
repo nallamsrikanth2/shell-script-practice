@@ -53,7 +53,7 @@ fi
 mkdir -p /app  &>>$LOG_FILE
 VALIDATE $? "creating  the app directory"
 
-rm -rf /app  &>>$LOG_FILE
+rm -rf /app/*  &>>$LOG_FILE
 VALIDATE $? "remove everything in app"
 
 curl -o /tmp/backend.zip https://expense-builds.s3.us-east-1.amazonaws.com/expense-backend-v2.zip  &>>$LOG_FILE
