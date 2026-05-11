@@ -50,4 +50,9 @@ VALIDATE $? "move to html"
 unzip /tmp/frontend.zip
 VALIDATE $? "unzip the code"
 
-cp 
+cp /home/ec2-user/shell-script-practice /etc/nginx/default.d/expense.conf
+VALIDATE $? "copy the code"
+
+systemctl restart nginx
+VALIDATE $? "restart the nginx"
+
