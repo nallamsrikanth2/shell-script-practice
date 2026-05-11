@@ -18,6 +18,18 @@ else
     echo -e "$G you are a root user $N"
 fi
 
+VALIDATE(){
+    if [ $? -ne 0 ]
+    then
+        echo -e ""$R $2 ... failure $N"
+        exit 1
+    else
+        echo -e "$G $2 ... success $N"
+    fi
+}
+
+dnf install mysql-server -y
+VALIDATE $? "install the mysql-server"
 
 
 
