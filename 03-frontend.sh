@@ -28,3 +28,16 @@ VALIDATE (){
         echo -e "$G $2 ... success $N"
     fi
 }
+
+dnf install nginx -y 
+VALIDATE $? "install the nginx"
+
+systemctl enable nginx
+VALIDATE $? "enable the nginx"
+
+systemctl start nginx
+VALIDATE $? "start the nginx"
+
+rm -rf /usr/share/nginx/html/*
+VALIDATE $? "remove everything in html directory"
+
